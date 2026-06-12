@@ -1,15 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Spectral induced polarization (SIP) MethodManager.
+"""Frequency-domain induced-polarization (FDIP) Data Manager.
 
-Spectral induced polarization (SIP) data handling, modelling and inversion."""
+FDIP field data handling, modelling and inversion."""
 
 from .fdip import FDIP
-FDIPdata = FDIP
-SIPdata = FDIP
 from .fdipmodelling import (DCIPMModelling,
                            ERTTLmod,
                            ERTMultiPhimod,
                            )
-
-__all__ = ['FDIP', 'FDIPdata', 'SIPdata']
