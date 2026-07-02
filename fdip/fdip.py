@@ -595,7 +595,7 @@ class FDIP(object):
 
     def simulate(self, mesh, rhovec, mvec, tauvec, cvec, **kwargs):
         """Synthetic simulation based on Cole-Cole model.
-        
+
         Parameters
         ----------
         mesh : pg.Mesh
@@ -1054,7 +1054,7 @@ class FDIP(object):
 
     def convertToTD(self, t=None, tau=None, tmin=0.01, tmax=10, nt=31):
         """Convert data set to TDIP.
-        
+
         Parameters
         ----------
         t : array
@@ -1070,14 +1070,14 @@ class FDIP(object):
         <
         Returns
         -------
-        tdip : pyBERT.TDIP
-            TDIP class instance 
+        tdip : TDIP
+            TDIP class instance
         """
-        from pybert import TDIP
+        from tdip import TDIP  # requires tdip package
 
         if t is None:
             t = np.logspace(np.log10(tmin), np.log10(tmax), nt)
-        
+
         if tau is None:
             tau = np.logspace(-4, 1, 41)
 
@@ -1477,7 +1477,7 @@ class FDIP(object):
             cid = self.getCellID(point)
             print("Detected ID={:d} for point ({:.1f}, {:.1f})".format(
                 cid, point[0], point[1]))
-        
+
         fstr = r"rho={:.1f}  Ohmm m={:.3f}  tau={:3e} s  c={:.2f}"
         vals = self.res[cid], self.m[cid], self.tau[cid], self.c[cid]
         print(fstr.format(*vals))
