@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Usage - FDIP</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../css/brands.min.css" rel="stylesheet">
+        <link href="../css/solid.min.css" rel="stylesheet">
+        <link href="../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">FDIP</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href=".." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../introduction/" class="nav-link">Introduction</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../installation/" class="nav-link">Installation</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="./" class="nav-link active" aria-current="page">Usage</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../api_reference.md" class="nav-link">API Reference</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../installation/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" class="nav-link disabled">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#usage" class="nav-link">Usage</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#preprocessing" class="nav-link">Preprocessing</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#inversion" class="nav-link">Inversion</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#postprocessing" class="nav-link">Postprocessing</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#working-in-3d" class="nav-link">Working in 3D</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#conversion-to-td" class="nav-link">Conversion to TD</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="usage">Usage</h1>
+<p>The fdip package holds some functions for importing, modelling and inverting tomographic spectral IP data measured in the frequency domain, based upon <a href="https://pygimli.org">pyGIMLi</a>.
+Single-frequency modelling and inversion is completely included in pyGIMLi, so this repository adds up for exploiting the spectral information.</p>
+<p>Main entry is the class FDIP, to be imported by</p>
+<pre><code class="language-python">from fdip import FDIP
+</code></pre>
+<p>It can be initialized empty or directly with a data file</p>
+<pre><code class="language-python">pro = TDIP(&quot;datafile.ohm&quot;)
+</code></pre>
+<p>Valid formats are:</p>
+<ul>
+<li>ERT scheme set accompagnied by .RHOA/.PHIA files</li>
+<li>Radic RES file from SIP256C or D</li>
+<li>MPT DAS-1</li>
+<li>single files holding individual frequencies</li>
+</ul>
+<p>You can also create an empty instance and use <code>pro.load(filename)</code>.</p>
+<p>As a result, the instance holds an ERT data file <code>pro.data</code>and matrices of apparent resistivity <code>pro.RHOA</code>) and phase ( <code>pro.PHIA</code>).</p>
+<p>You can add other files by <code>pro.addData(filename)</code></p>
+<h2 id="preprocessing">Preprocessing</h2>
+<p>Most important preprocessing tool is <code>pro.filter()</code>.
+It works either along the data sequence axis (like <code>data.remove()</code>) or along the time axis and removes complete data (including all gates) or gates (for all data).
+Important keywords are</p>
+<pre><code class="language-python">nr=[], # list of numbers
+fmin=0, fmax=1e9, # minimum/maximum frequency
+kmax=1e6, # maximum geometric factor
+forward=False, # keep only forward measurements
+electrode=None, ab=None, mn=None, # electrodes (combinations)
+</code></pre>
+<p>If you don't want to remove the whole data point, but only disregard some erroneous data (like outliers), you can mask these using <code>.mask()</code> with the keywords</p>
+<pre><code class="language-python">rhomin=0, rhomax=9e99, # min/max app res.
+phimin=-9e99, phimax=9e99 # min/max app. phase
+</code></pre>
+<p>You can also mask the whole decay by <code>filter(..., mask=True)</code> in order to not to loose the apparent resistivity information.</p>
+<p>You can generate synthetic data assuming a Cole-Cole model by using</p>
+<pre><code class="language-python">pro.simulate(mesh, rhovec, mvec, tauvec, cvec)
+</code></pre>
+<p>where rhovec, mvec, tauvec, cvec are vectors pointing into the different regions of the mesh</p>
+<p><code>.getDataSpectrum()</code></p>
+<p><code>.showSingleFrequencyData</code></p>
+<p><code>.showAllFrequencyData</code></p>
+<p><code>.generateDataPDF()</code></p>
+<p><code>.showDataSpectrum()</code></p>
+<p><code>.generateSpectraPDF()</code></p>
+<p><code>.removeEpsilon()</code></p>
+<h2 id="inversion">Inversion</h2>
+<p><code>pro.singleInversion()</code></p>
+<p>This triggers an <code>ERTIPManager()</code> to which you can pass all options.</p>
+<p><code>pro.showSingleResult</code> shows the result</p>
+<p>To invert all frequencies sequentially, use
+<code>pro.individualInversion()</code>
+or simultaneously, use
+<code>pro.simultaneousInversion()</code>
+which in turn calls
+<code>pro.simultaneousRestivityInversion()</code>
+and
+<code>pro.simultaneousPhaseInversion()</code></p>
+<p>There is a special inversion into Debye models for every cell.
+<code>pro.invertDebye()</code></p>
+<p>Class instances can be accessed by <code>pro.ERT</code>, <code>pro.invIP</code></p>
+<h2 id="postprocessing">Postprocessing</h2>
+<p>As a result of apparent chargeability inversion, you have a matrix of resistivities <code>pro.RES</code> and phases <code>pro.PHI</code> for every model cell, matching the inversion mesh <code>pro.pd</code>.</p>
+<p><code>.showModelSpectrum()</code> plots the inverted spectrum for a certain position (and <code>showModelSpectra</code> for a list of them), whereas <code>.getModelSpectrum()</code> returns a pyGIMLi SIP <code>Spectrum</code> class instance which then can be further analysed.</p>
+<p><code>.fitAllRhoPhi()</code> fits both resistivity and phase, whereas <code>.fitAllPhi()</code> fits only phases</p>
+<p>As a result, you obtain a Cole-Cole model for every cell, whose parameter can be show with <code>showColeColeParameters</code>.</p>
+<p><code>saveFigures()</code></p>
+<p><code>saveResults()</code></p>
+<p><code>loadResults()</code></p>
+<p>so that you can do postprocessing independent of inversion by</p>
+<pre><code class="language-python">pro = FDIP(filename)
+pro.loadResults()
+...
+</code></pre>
+<h2 id="working-in-3d">Working in 3D</h2>
+<p>While visualization is designed for 2D profiles, numerical computations should work in 3D as well, provided a 3D mesh is created for the ERT manager.</p>
+<h2 id="conversion-to-td">Conversion to TD</h2>
+<p><code>convertToTD()</code> converts the whole data set to a time-domain instance <code>TDIP</code> through Debye decomposition (package TDIP required).</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
