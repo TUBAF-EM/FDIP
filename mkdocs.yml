@@ -8,5 +8,6 @@ nav:
   # - API Reference: api_reference.md
 # theme: readthedocs
 plugins:
-  - mkdocs-jupyter
+  - mkdocs-jupyter:
+      execute: false
   # - mkdocs_apidoc
