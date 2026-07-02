@@ -8,7 +8,7 @@
         
         
         <link rel="shortcut icon" href="../img/favicon.ico">
-        <title>Introduction - FDIP</title>
+        <title>Fdip - FDIP</title>
         <link href="../css/bootstrap.min.css" rel="stylesheet">
         <link href="../css/fontawesome.min.css" rel="stylesheet">
         <link href="../css/brands.min.css" rel="stylesheet">
@@ -38,7 +38,7 @@
                                 <a href=".." class="nav-link">Home</a>
                             </li>
                             <li class="nav-item">
-                                <a href="./" class="nav-link active" aria-current="page">Introduction</a>
+                                <a href="../introduction/" class="nav-link">Introduction</a>
                             </li>
                             <li class="nav-item">
                                 <a href="../installation/" class="nav-link">Installation</a>
@@ -52,16 +52,6 @@
                         </ul>
 
                     <ul class="nav navbar-nav ms-md-auto">
-                            <li class="nav-item">
-                                <a rel="prev" href=".." class="nav-link">
-                                    <i class="fa fa-arrow-left"></i> Previous
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a rel="next" href="../installation/" class="nav-link">
-                                    Next <i class="fa fa-arrow-right"></i>
-                                </a>
-                            </li>
                     </ul>
                 </div>
             </div>
@@ -79,29 +69,12 @@
     
     <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
         <ul class="nav flex-column">
-            
-            <li class="nav-item" data-bs-level="2"><a href="#references" class="nav-link">References</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
         </ul>
     </div>
 </div></div>
                     <div class="col-md-9" role="main">
 
-<p>Formerly part of BERT repository, but since 2026 independent.
-The code is based upon pyGIMLi (Rücker et al. 2017) and its ERT module based on Günther et al. (2006).
-Whereas the ERT module only includes only single-frequency (or chargeability) inversion, the spectral induced polarization (SIP) in the frequency domain. For time domain SIP, please use <a href="https://github.com/TUBAF-EM/TDIP">TDIP</a></p>
-<p>For details and examples, we refer to the papers of Günther &amp; Martin (2016) describing the methodology, Martin et al. (2020) comparing with time domain, Martin et al. (2021) for application to slag heaps, and the accompagnying Zenodo data sets with codes.</p>
-<h2 id="references">References</h2>
-<ul>
-<li>Günther, T. &amp; Martin, T. (2016): Spectral two-dimensional inversion of frequency-domain induced polarisation data from a mining slag heap. Journal of Applied Geophysics 135, 436-448, <a href="https://doi.org/10.1016/j.jappgeo.2016.01.008">doi:10.1016/j.jappgeo.2016.01.008</a>.</li>
-<li>Martin, T., Günther, T., Orozco, A.F. &amp; Dahlin, T. (2020): Evaluation of spectral induced polarization field measurements in time and frequency domain, J. Appl. Geophys. 180, 104141, <a href="https://doi.org/10.1016/j.jappgeo.2020.104141">doi:10.1016/j.jappgeo.2020.104141</a>.</li>
-<li>Martin, T., Günther, T., Weller, A. &amp; Kuhn, K. (2021): Classification of slag material by spectral induced polarization laboratory and field measurements. J. Appl. Geophys. 194, 104439, <a href="https://doi.org/10.1016/j.jappgeo.2021.104439">doi:10.1016/j.jappgeo.2021.104439</a>.</li>
-<li>Rücker, C., Günther, T., Wagner, F.M. (2017): pyGIMLi: An open-source library for modelling and inversion in geophysics, Computers &amp; Geosciences 109, 106-123, <a href="http://doi.org/10.1016/j.cageo.2017.07.011">doi:10.1016/j.cageo.2017.07.011</a>.</li>
-<li>Günther, T., Rücker, C. &amp; Spitzer, K. (2006): Three-dimensional modeling and inversion of dc resistivity data incorporating topography – II: Inversion. Geophys. J. Int. 166, 506-517, <a href="https://doi.org/10.1111/j.1365-246X.2006.03011.x">doi:10.1111/j.1365-246X.2006.03011.x</a>.</li>
-<li>Rücker, C., Günther, T. &amp; Spitzer, K. (2006): Three-dimensional modeling and inversion of dc resistivity data incorporating topography – I: Modeling. Geophys. J. Int. 166, 495-505, <a href="https://doi.org/10.1111/j.1365-246X.2006.03010.x">doi:10.1111/j.1365-246X.2006.03010.x</a>.</li>
-</ul></div>
+<p>{{ auto_module("fdip") }}</p></div>
             </div>
         </div>
 
