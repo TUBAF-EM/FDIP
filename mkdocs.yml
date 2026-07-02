@@ -4,5 +4,9 @@ nav:
   - Introduction: introduction.md
   - Installation: installation.md
   - Usage: usage.md
-  - API Reference: api_reference.md
+  - Example: synth.ipynb
+  # - API Reference: api_reference.md
 # theme: readthedocs
+plugins:
+  - mkdocs-jupyter
+  # - mkdocs_apidoc
