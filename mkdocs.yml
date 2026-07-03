@@ -8,6 +8,9 @@ nav:
   # - API Reference: api_reference.md
 # theme: readthedocs
 plugins:
-  - mkdocs-jupyter:
+  - mknotebooks:
       execute: false
+      timeout: 60
+  # - mkdocs-jupyter:
+  #     execute: false
   # - mkdocs_apidoc
