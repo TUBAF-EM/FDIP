@@ -4,7 +4,7 @@
 
 # general system imports
 import sys
-import os.path
+from pathlib import Path
 from math import pi, sqrt
 
 # numpy and plotting imports
@@ -176,17 +176,20 @@ class FDIP(object):
                 self.loadMPTData(filename)
                 self.sortFrequencies()
 
-            elif os.path.isfile(filename):  # full file name
+            elif Path(filename).is_file():  # full file name
                 self.data = pg.DataContainerERT(filename)
                 self.basename = filename[:-4]
             else:
+                if filename.endswith('.shm'):
+                    filename = filename[:-4]
+
                 self.basename = filename
-                if os.path.isfile(filename + '.shm'):
+                if Path(filename + '.shm').is_file():
                     self.data = pg.DataContainerERT(filename + '.shm')
 
-                if os.path.isfile(filename + '.rhoa'):
+                if Path(filename + '.rhoa').is_file():
                     self.RHOA = np.loadtxt(filename + '.rhoa', skiprows=1)
-                if os.path.isfile(filename + '.phia'):
+                if Path(filename + '.phia').is_file():
                     A = np.loadtxt(filename + '.phia')
                     self.PHIA = A[1:, :]
                     self.freq = A[0, :]
