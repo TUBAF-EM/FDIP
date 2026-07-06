@@ -42,6 +42,7 @@ classifiers = [
 dependencies = [
     "setuptools>=75.8.2",
     "pygimli",
+    "matplotlib"
 ]
 
 [project.urls]

@@ -1030,9 +1030,9 @@ class FDIP(object):
 
         data = self.singleFrequencyData(fr)
         if hasattr(ax, '__iter__'):  # iterable, i.e. 2 axes
-            ert.show(data, vals=data['rhoa'], ax=ax[0], **kwargs)
+            data.show('rhoa', ax=ax[0], **kwargs)
             kwargs["label"] = "-apparent phase (mrad)"
-            ert.show(data, vals=data['ip'], ax=ax[1], **kwargs)
+            data.show('ip', ax=ax[1], **kwargs)
         else:
             if what is None:
                 what = 'ip'
