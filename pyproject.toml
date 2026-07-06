@@ -12,7 +12,8 @@ include = ["fdip*"]
 
 [project]
 name = "FDIP"
-dynamic = ["version"]
+version = "0.5.0"
+# dynamic = ["version"]
 
 requires-python = ">=3.10"
 authors = [
