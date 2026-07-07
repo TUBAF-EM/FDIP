@@ -159,6 +159,9 @@ class FDIP(object):
             self.PHIA = np.loadtxt(filename[2])
 
         elif isinstance(filename, str):
+            if filename.endswith('.shm'):
+                filename = filename[:-4]
+
             if filename.lower().rfind('.res') >= 0:  # SIP 256 or Fuchs file
                 self.header, self.DATA, self.AB, self.RU = \
                     readSIP256file(filename, verbose)
@@ -180,9 +183,6 @@ class FDIP(object):
                 self.data = pg.DataContainerERT(filename)
                 self.basename = filename[:-4]
             else:
-                if filename.endswith('.shm'):
-                    filename = filename[:-4]
-
                 self.basename = filename
                 if Path(filename + '.shm').is_file():
                     self.data = pg.DataContainerERT(filename + '.shm')
@@ -194,8 +194,10 @@ class FDIP(object):
                     self.PHIA = A[1:, :]
                     self.freq = A[0, :]
             self.sortFrequencies()
+
         if f is not None:
             self.freq = f
+
         if not hasattr(self, 'freq'):
             if instr == 'Fuchs':
                 stf = 12000. / 2**np.arange(25)
@@ -1343,12 +1345,14 @@ class FDIP(object):
         ----------
         meshkw : dict
             Mesh parameters to be passed to createMesh
+            (paraDX, quality, depth, maxCellArea)
         relativeError : float [0.03]
             relative error floor (in 1), if error not already estimated
         absoluteUError : float [100e-5]
             absolute voltage error (in V), if error not already estimated
         """
         self.verbose = kwargs.get('verbose', self.verbose)
+        scalef = kwargs.pop("scaleF", 1.0)
         if self.ERT is None:
             self.ERT = self.createERTManager()
             meshkw.setdefault("paraDX", 0.25)
@@ -1358,7 +1362,7 @@ class FDIP(object):
             mesh = self.ERT.mesh
 
         nf = self.RHOA.shape[1]
-        fop = MultiFrameModelling(ert.ERTModelling)
+        fop = MultiFrameModelling(ert.ERTModelling, scalef=scalef)
         fop.setData([self.data, ] * nf)
         fop.setMesh(mesh)
         fop.mesh()  # triggers
@@ -1403,10 +1407,10 @@ class FDIP(object):
     def saveResults(self, basename=None, dirname=None):
         """Save inversion results to .rho and .phi file plus mesh."""
         if basename is None:
-            basename = self.basename
+            basename = Path(self.basename)
 
         if dirname is not None:
-            basename = os.path.join(dirname, basename)
+            basename = Path(dirname) / basename
 
         self.pd.save(basename+'_pd.bms')
         if hasattr(self, 'RES'):
@@ -1445,12 +1449,12 @@ class FDIP(object):
             basename = self.basename
 
         if dirname is not None:
-            basename = os.path.join(dirname, basename)
+            basename = Path(dirname) / basename
 
         self.pd = pg.Mesh(basename+'_pd.bms')
         self.RES = np.loadtxt(basename+'.rho')
         self.PHI = np.loadtxt(basename+'.phi')
-        if os.path.isfile(basename+'.coverage'):
+        if Path(basename+'.coverage').is_file():
             self.coverage = np.loadtxt(basename+'.coverage')
 
         self.chooseResult(take=take)
