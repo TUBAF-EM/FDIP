@@ -1,0 +1,3 @@
+## FDIP class
+
+::: fdip.FDIP
