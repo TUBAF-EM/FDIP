@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """Spectral induced polarization (SIP) data handling and inversion."""
 
 # general system imports
@@ -27,7 +26,7 @@ from pygimli.viewer.mpl import setCbarLevels, drawSensors
 from .fdipmodelling import DCIPMModelling
 
 
-class FDIP(object):
+class FDIP:
     """Class for managing spectral induced polarization (SIP) field data."""
 
     def __init__(self, fileName=None, **kwargs):
@@ -93,7 +92,15 @@ class FDIP(object):
             self.setElectrodePositions(pos, circular=self.circular)
 
     def setElectrodePositions(self, pos, circular=None):
-        """Set electrode positions, compute geometric factors and recalc RHOA."""
+        """Set electrode positions, compute geometric factors and recalc RHOA.
+
+        Parameters
+        ----------
+        pos : array
+            electrode positions (x,y,z)
+        circular : bool [None]
+            if True, the last electrode is connected to the first one
+        """
         for i, ipos in enumerate(pos):
             self.data.setSensor(i, ipos)
 
@@ -140,7 +147,7 @@ class FDIP(object):
 
         Parameters
         ----------
-        fileName: str, [str, ]
+        fileName: str
             single fileName, basename or fileName list for shm/rhoa/phia
         f: array
             frequency vector (not in all instrument data files)
@@ -273,10 +280,8 @@ class FDIP(object):
         ----------
         electrodes : list [None]
             Overwrite the electrodes positions given in the SIP265.res file.
-
         takeall : bool [False]
             Don't delete any data while reading res files.
-
         extraPowerRow : bool [False]
             SIP256 can be operated with separated current electrodes. If set
             electrode positions need to be specified twice (voltage, current).
@@ -320,9 +325,9 @@ class FDIP(object):
             if len(electrodes) >= self.data.sensorCount():
                 self.data.setSensorPositions(electrodes)
             else:
-                print(self.data.sensorCount(), len(electrodes))
-                raise Exception("Electrode count mismatch. "
-                                "Cannot not overwrite Electrodes.")
+                pg.error("Sensor count mismatch."
+                         f"Expected {self.data.sensorCount()}, got {len(electrodes)}.")
+                raise IndexError("Electrode count mismatch. Cannot overwrite Electrodes.")
         else:
             for line in self.header['Layout']:
                 self.data.createSensor(
@@ -352,9 +357,6 @@ class FDIP(object):
                 A = self.DATA[ii[i]][iu[i]]
                 for ifr, fr in enumerate(self.freq):
                     line = A[A[:, 0].round(3) == self.freq[ifr]]
-                    # print(line)
-                    # print(self.tMeas[ifr])
-                    # sys.exit()
                     if len(line):
                         self.RHOA[i, ifr] = np.abs(line[0][1])
                         self.RHOA_E[i, ifr] = np.abs(line[0][3]) / 100.  # in %
@@ -374,7 +376,7 @@ class FDIP(object):
                             self.T[i, ifr] = line[0][8]
 
             else:
-                print("RU " + str(iu[i]) + " not present, RI=" + str(ii[i]))
+                pg.info(f"RU {iu[i]} not present, RI={ii[i]}")
 
         self.sortFrequencies()
         if electrodes is not None:
@@ -397,10 +399,7 @@ class FDIP(object):
         Second data can contain additional frequencies (horizontal stacking) or
         additional quadrupoles (vertical stacking).
         """
-        if isinstance(name, str):
-            sip2 = FDIP(name)
-        else:
-            sip2 = name
+        sip2 = FDIP(name) if isinstance(name, str) else name
 
         if self.RHOA.shape[1] == sip2.RHOA.shape[1]:  # same frequencies
             self.data.add(sip2.data)
@@ -458,9 +457,11 @@ class FDIP(object):
         Parameters
         ----------
         maxdrhoa : float
-            max
+            maximum relative change of rhoa
         maxddphia : float
-            max
+            maximum second derivative of phia
+        maxf : int
+            maximum frequency index to be considered
         """
         nr = []
         for i, rhoa in enumerate(self.RHOA):
@@ -504,7 +505,7 @@ class FDIP(object):
         corrSID: int [1]
             correct sensor index (like in data files)
         """
-        print("filtering: nd={:d}, nf={:d}".format(*self.RHOA.shape))
+        pg.info("filtering: nd={:d}, nf={:d}".format(*self.RHOA.shape))
 
         ind = (self.freq >= fmin) & (self.freq <= fmax)
         self.RHOA = self.RHOA[:, ind]
@@ -538,12 +539,12 @@ class FDIP(object):
         if mn is not None:
             ind[np.isclose(np.abs(self.data("n")-self.data("m")), mn)] = False
 
-        print("Sum(ind):", sum(ind))
+        pg.info(f"Sum(ind): {sum(ind)}")
         if forward:
             ind[am < 0] = False  # reverse measurements
-            print("Sum(ind):", sum(ind))
+            pg.info(f"Sum(ind): {sum(ind)}")
 
-        if any([t in kwargs for t in 'abmn']):
+        if any(t in kwargs for t in 'abmn'):
             eind = np.zeros_like(ind, dtype=bool)
             for name in ['a', 'b', 'm', 'n']:
                 u = np.atleast_1d(kwargs.pop(name, []))
@@ -552,10 +553,10 @@ class FDIP(object):
                 for uu in u:
                     eind = eind | np.not_equal(self.data[name] + corrSID, uu)
 
-            print("Sum(ind):", sum(ind))
-            print("Sum(eind):", sum(eind))
+            pg.info(f"Sum(ind): {sum(ind)}")
+            pg.info(f"Sum(eind): {sum(eind)}")
             ind = ind & eind
-            print("Sum(ind):", sum(ind))
+            pg.info(f"Sum(ind): {sum(ind)}" )
 
         self.RHOA = self.RHOA[ind, :]
         self.PHIA = self.PHIA[ind, :]
@@ -579,7 +580,7 @@ class FDIP(object):
             self.data.removeUnusedSensors()
 
         if kwargs.pop("verbose", True):
-            print("filtered: nd={:d}, nf={:d}".format(*self.RHOA.shape))
+            pg.info(f"filtered: nd={self.RHOA.shape[0]}, nf={self.RHOA.shape[1]}")
 
     def mask(self, rhomin=0, rhomax=9e99, phimin=-9e99, phimax=9e99):
         """Mask (mark invalid but not delete) single data of RHOA/PHIA cubes.
@@ -657,15 +658,22 @@ class FDIP(object):
             # phiai.setVal(pi - phiai[phiai > pi/2], pg.find(phiai > pi/2))
             if verbose:
                 phi = -np.angle(res)
-                print('{:d}\t{:5e}\t{:.2f}\t{:.2f}'.format(
-                    i, fr, max(phi)*1000, max(phiai)*1000))
+                pg.info(f'{i:d}\t{fr:5e}\t{max(phi)*1000:.2f}\t{max(phiai)*1000:.2f}')
             self.RHOA[:, i] = rhoai
             self.PHIA[:, i] = -phiai  # convention
 
         return self.RHOA, self.PHIA
 
     def saveData(self, basename=None, withTimes=False):
-        """Save data shm and .rhoa/.phia matrices."""
+        """Save data shm and .rhoa/.phia matrices.
+
+        Parameters
+        ----------
+        basename : str [None]
+            filename to save file, if None then self.basename is used
+        withTimes : bool [False]
+            if True, save also the measurement times in a separate file
+        """
         if basename is None:
             basename = self.basename
 
@@ -673,7 +681,15 @@ class FDIP(object):
         self.writeDataMat(basename=basename, withTimes=withTimes)
 
     def writeDataMat(self, fmt='%10.6f', withTimes=False, basename=None):
-        """Output the data as matrices called basename + ending rhoa/phia."""
+        """Output the data as matrices called basename + ending rhoa/phia.
+
+        Parameters
+        ----------
+        fmt : str ['%10.6f']
+            format for saving the data
+        withTimes : bool [False]
+            if True, save also the measurement times in a separate file
+        """
         if basename is None:
             basename = self.basename
 
@@ -763,8 +779,7 @@ class FDIP(object):
         """
         if isinstance(f, float):  # choose closest frequency
             f = np.argmin(np.abs(self.freq - f))
-            pg.info('use frequency index: {0} for {1} Hz'.format(
-                f, self.freq[f]))
+            pg.info(f'use frequency index: {f} for {self.freq[f]} Hz')
 
         data1 = pg.DataContainerERT(self.data)
         # data1.set('rhoa', self.RHOA[:, ifr].filled())
@@ -790,16 +805,21 @@ class FDIP(object):
         return data1
 
     def writeSingleFrequencyData(self, kmax=None):
-        """Write single frequency data in unified data format."""
+        """Write single frequency data in unified data format.
+
+        Parameters
+        ----------
+        kmax : float [None]
+            maximum (absolute) geometric factor to be considered
+        """
         for ifr, fri in enumerate(self.freq):
             data1 = self.singleFrequencyData(ifr, kmax=kmax)
             data1.checkDataValidity()
             if fri > 1.:
-                fname = '{:02d}-{:d}Hz.ohm'.format(ifr, int(np.round(fri)))
+                fname = f'{ifr:02d}-{int(np.round(fri)):d}Hz.ohm'
             else:
-                fname = '{:02d}-{:d}mHz.ohm'.format(ifr,
-                                                    int(np.round(fri*1e3)))
-#            data1.save(self.basename+'_'+fname, 'a b m n rhoa k u i ip')
+                fname = f'{ifr:02d}-{int(np.round(fri*1e3)):d}mHz.ohm'
+
             if self.RHOA_E is not None:
                 data1.save(self.basename + '_' + fname,
                            'a b m n rhoa err ip iperr')
@@ -808,7 +828,7 @@ class FDIP(object):
 
     def showDataSpectra(self, nr=[], ax=None, ab=None, mn=None, verbose=True,
                         **kwargs):
-        """Show decay curves.
+        """Show data spectra.
 
         Parameters
         ----------
@@ -868,22 +888,18 @@ class FDIP(object):
 
     def generateSpectraPDF(self, useall=False, rlim=None,
                            maxdist=999, figsize=(8.5, 11), **kwargs):
-        """Make pdf file containing all spectra.
+        """Generate pdf file containing all spectra.
 
         Parameters
         ----------
         useall : bool [False]
             use all data, also skewed dipole-dipole data with MN!=AB
-
         maxdist : float [999]
             maximum distance between current and voltage dipoles
-
         maxphi : float [100]
             maximum phase in mrad
-
         rlim : [float, float]
             limit for resistivity axis
-
         figsize : (float, float)
             figure size in inches
         """
@@ -905,7 +921,7 @@ class FDIP(object):
                     j = int(self.data('m')[ii])
                     co = colors[j % 7]
                     marker = markers[j // 7]
-                    lab = 'MN={:d}-{:d}'.format(j+1, int(self.data('n')[ii])+1)
+                    lab = f'MN={j+1:d}-{int(self.data("n")[ii])+1:d}'
                     ax[0].semilogx(self.freq, np.abs(rhoa), label=lab,
                                    color=co, marker=marker, **kwargs)
                     ax[1].semilogx(self.freq, phia*1000, color=co,
@@ -924,8 +940,7 @@ class FDIP(object):
                 ax[0].grid(True)
                 ax[1].grid(True)
                 ax[0].legend(numpoints=1, ncol=2)
-                ax[0].set_title('AB={:d}-{:d}'.format(int(ci)//100,
-                                                      int(ci) % 100))
+                ax[0].set_title(f'AB={int(ci)//100:d}-{int(ci) % 100:d}')
                 fig.savefig(pdf, format='pdf')
                 fig.clf()
 
@@ -937,23 +952,18 @@ class FDIP(object):
 
         Parameters
         ----------
-        Colorscales:
-
+        kmax : float [None]
+            maximum (absolute) geometric factor to be considered
         rmin : float [minvalues]
             minimum apparent resistivity in mrad
-
         rmax : float [maxvalues]
             minimum apparent resistivity in mrad
-
         ipmin : float [0]
             minimum apparent phase in mrad
-
         ipmax : float [maxvalues]
             minimum apparent phase in mrad
-
         figsize : tuple(width, height)
             figure size in inches
-
         **kwargs
             options to be passed to ert.showData()
         """
@@ -975,7 +985,7 @@ class FDIP(object):
         fig = plt.figure(figsize=figsize)
         basename = kwargs.pop("basename", self.basename)
         addname = kwargs.pop("addname", "")
-        with PdfPages(self.basename + addname + '-data.pdf') as pdf:
+        with PdfPages(basename + addname + '-data.pdf') as pdf:
             for i, fri in enumerate(self.freq):
                 ax = fig.subplots(nrows=2, sharex=True)
                 if self.RHOA is not None and self.PHIA is not None:
@@ -1005,16 +1015,19 @@ class FDIP(object):
                 fig.clf()
 
     def removeEpsilon(self, mode=2, verbose=False):
-        """Remove high-frequency parts by fitting static epsilon."""
+        """Remove high-frequency parts by fitting static epsilon.
+
+        Parameters
+        ----------
+        mode : int [2]
+            number of last frequencies to use for fitting static epsilon
+        """
         we0 = self.freq * 2 * np.pi * 8.854e-12  # Omega epsilon_0
         for i in range(self.RHOA.shape[0]):
             # imaginary conductivity
             sigmai = 1/self.RHOA[i, :] * np.sin(self.PHIA[i, :])
             epsr = sigmai / we0  # relative permittivity
-            if mode == 0:
-                er = 2*epsr[-1] - epsr[-2]  # extrapolation
-            else:
-                er = np.mean(epsr[-mode:])  # mean of last ones
+            er = 2 * epsr[-1] - epsr[-2] if mode == 0 else np.mean(epsr[-mode:])
 
             print(er)
             sigmai -= max([er, 0]) * we0  # correct for static epsilon term
@@ -1026,7 +1039,19 @@ class FDIP(object):
             delattr(self, 'DATA')  # make sure corrected spectra are plotted
 
     def showSingleFrequencyData(self, fr=0, ax=None, what=None, **kwargs):
-        """Show pseudosections of a single frequency."""
+        """Show pseudosections of a single frequency.
+
+        Parameters
+        ----------
+        fr : float|int
+            frequency in Hz (float) or index (int)
+        ax : matplotlib.axes
+            axis to plot into, if None then new figure is created
+        what : str
+            what to plot, either 'rhoa' or 'ip', if None then both are plotted
+        kwargs : dict
+            dictionary forwarded to ert.showData()
+        """
         if ax is None:
             if what is None:  # plot both
                 fig, ax = plt.subplots(nrows=2, sharex=True, sharey=True)
@@ -1072,11 +1097,10 @@ class FDIP(object):
             number of gates
         tau : array
             array of relaxation constants
-        <
+
         Returns
         -------
-        tdip : TDIP
-            TDIP class instance
+        TDIP class instance
         """
         from tdip import TDIP  # requires tdip package
 
@@ -1140,7 +1164,6 @@ class FDIP(object):
                 startmodel is the reference model for the inversion
 
             forwarded to createMesh
-
             * depth
             * quality
             * paraDX
@@ -1247,7 +1270,17 @@ class FDIP(object):
         iIP.echoStatus()
 
     def singleMInversion(self, ifr=0, ipError=0.005, **kwargs):
-        """Chargeability-based inversion."""
+        """Chargeability-based inversion.
+
+        Parameters
+        ----------
+        ifr : int [0]
+            frequency number
+        ipError : float [0.005]
+            error of ip measurements
+        **kwargs
+            additional keyword arguments passed to the inversion
+        """
         if ifr >= len(self.freq):
             ifr = len(self.freq) - 1
         ma = pg.Vector(1 - self.RHOA[:, ifr] / self.RHOA[:, 0])
@@ -1280,7 +1313,7 @@ class FDIP(object):
         nf = len(self.freq)
         for i in range(nf):
             if verbose:
-                pg.info("Inverting frequency {:}".format(i))
+                pg.info(f"Inverting frequency {i}")
             self.singleInversion(ifr=i, **kwargs)
             if i == 0:
                 self.RES = np.zeros((self.pd.cellCount(), nf))
@@ -1290,9 +1323,30 @@ class FDIP(object):
             self.PHI[:, i] = self.phi
 
     def showSingleResult(self, res=None, phi=None, ax=None, nr=0, imin=0,
-                         rmin=None, rmax=None, imax=None, save=None,
-                         **kwargs):
-        """Show resistivity and phase from single f inversion."""
+                         rmin=None, rmax=None, imax=None, save=None, **kwargs):
+        """Show resistivity and phase from single frequency inversion.
+
+        Parameters
+        ----------
+        res : array | int | None
+            resistivity model to show, if int then index of .RES is used
+        phi : array | None
+            phase model to show, if None then .PHI is used
+        ax : matplotlib.axes | None
+            axis to plot into, if None then new figure is created
+        nr : int [0]
+            index of frequency to show, if res is int then this is ignored
+        imin : float [0]
+            minimum phase in mrad
+        rmin : float [None]
+            minimum resistivity in Ohmm
+        rmax : float [None]
+            maximum resistivity in Ohmm
+        imax : float [None]
+            maximum phase in mrad
+        save : bool | str | None
+            if True then save to basename-IndXX.pdf, if str then save to this
+        """
         if isinstance(res, int):
             nr = int(res)
             phi = self.PHI[:, nr]
@@ -1312,7 +1366,7 @@ class FDIP(object):
                 label=r"Resistivity in $\Omega$m",
                 coverage=coverage, **kwargs)
         if phi is None:
-            raise Exception("no valid phi values found.")
+            raise ImportError("no valid phi values found.")
         pg.show(self.pd, data=phi*1000., ax=ax[1], colorBar=True,
                 logScale=(imin > 0), cMax=imax, cMin=imin,
                 label=r"-$\phi$ in mrad",
@@ -1344,8 +1398,7 @@ class FDIP(object):
         Parameters
         ----------
         meshkw : dict
-            Mesh parameters to be passed to createMesh
-            (paraDX, quality, depth, maxCellArea)
+            parameters passed to createMesh (paraDX, quality, depth, maxCellArea)
         relativeError : float [0.03]
             relative error floor (in 1), if error not already estimated
         absoluteUError : float [100e-5]
@@ -1366,7 +1419,7 @@ class FDIP(object):
         fop.setData([self.data, ] * nf)
         fop.setMesh(mesh)
         fop.mesh()  # triggers
-        dataVec = np.concatenate([rhoa for rhoa in self.RHOA.T])
+        dataVec = np.concatenate(list(self.RHOA.T))
         if not self.data.haveData("err"):
             self.data["rhoa"] = self.RHOA[:, 0]
             self.data["err"] = ert.estimateError(
@@ -1482,8 +1535,7 @@ class FDIP(object):
             cid = point
         else:
             cid = self.getCellID(point)
-            print("Detected ID={:d} for point ({:.1f}, {:.1f})".format(
-                cid, point[0], point[1]))
+            print(f"Detected ID={cid} for point ({point[0]:.1f}, {point[1]:.1f})")
 
         fstr = r"rho={:.1f}  Ohmm m={:.3f}  tau={:3e} s  c={:.2f}"
         vals = self.res[cid], self.m[cid], self.tau[cid], self.c[cid]
@@ -1596,9 +1648,9 @@ class FDIP(object):
         cb2 = True
         for i, fri in enumerate(self.freq):
 
-            fstr = '(f={:d} Hz)'.format(int(fri))
+            fstr = f'(f={int(fri):d} Hz)'
             if fri < 1.:
-                fstr = '(f={:d} mHz)'.format(int(fri*1e3))
+                fstr = f'(f={int(fri*1e3):d} mHz)'
 
             for axi in ax:
                 axi.cla()
@@ -1630,7 +1682,7 @@ class FDIP(object):
                 pg.abs(self.data('n') - abmn[3]+1)
             dataNo = np.argmin(bb)
             if verbose:
-                print('Nr {}'.format(dataNo))
+                print(f'Nr {dataNo}')
 
         return SIPSpectrum(f=self.freq, amp=self.RHOA[dataNo, :],
                            phi=self.PHIA[dataNo, :])
@@ -1653,7 +1705,7 @@ class FDIP(object):
         fig, ax = plt.subplots(nrows=2, sharex=True)
         LABELS = []
         for pos in positions:
-            label = 'x={:.1f} z={:.1f}'.format(*pos)
+            label = f'x={pos[0]:.1f} z={pos[1]:.1f}'
             LABELS.append(label)
 #            kwargs['label'] = label
             self.showModelSpectrum(pos, ax=ax, **kwargs)
@@ -1736,7 +1788,25 @@ class FDIP(object):
                                rlim=(None, None), mlim=(None, None),
                                tlim=(None, None), clim=(0, 0.5),
                                mincov=0.05, **kwargs):
-        """Show distribution of Cole-Cole parameters."""
+        """Show distribution of Cole-Cole parameters.
+
+        Parameters
+        ----------
+        figsize : tuple [8, 12]
+            figure size
+        save : bool [False]
+            if True then save to basename-CCfit.pdf
+        rlim : tuple [None, None]
+            resistivity limits for colorbar
+        mlim : tuple [None, None]
+            chargeability limits for colorbar
+        tlim : tuple [None, None]
+            time constant limits for colorbar
+        clim : tuple [0, 0.5]
+            relaxation exponent limits for colorbar
+        mincov : float [0.05]
+            minimum coverage for colorbar
+        """
         if self.res is None and self.RES is not None:  # only simultaneous
             self.res = self.RES[:, 0]
         if 'coverage' in kwargs:
@@ -1781,7 +1851,7 @@ class FDIP(object):
 
 
 def main(argv):
-    """Main."""
+    """Run exemplarily."""
     sip = FDIP(argv)
     print(sip)
     sip.generateSpectraPDF()
