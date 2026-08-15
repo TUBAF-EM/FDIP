@@ -5,11 +5,14 @@ Formerly part of BERT repository, the theory behind the heart, spectral inversio
 The code is based upon pyGIMLi (Rücker et al. 2017) and its ERT module and uses complex-valued forward modelling and inversion.
 For usage, we refer to Martin et al. (2020) and the accompagnying Zenodo data sets with codes, or Martin et al. (2021).
 
-To use the package and keep updated, just
+The package can be installed by `pip install FDIP`.
+It is hosted at <https://github.com/TUBAF-EM/FDIP>.
+To use the package and stay updated, just
 
-1. `git clone` the repository and go to its location with bash, PowerShell etc.
-2. install the code editable by `pip install -e .`
-3. Update at any later time by `git pull` (no further step needed)
+1. `git clone https://github.com/TUBAF-EM/FDIP.git`
+2. to its location with bash, PowerShell etc.
+3. install the code editable by `pip install -e .`
+4. Update at any later time by `git pull`
 
 ## References
 

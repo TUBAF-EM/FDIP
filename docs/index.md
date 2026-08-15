@@ -1,19 +1,10 @@
 # Frequency-Domain Induced-Polarization (FDIP) data processing
 
-Formerly part of BERT repository, but since 2026 independent.
+Formerly part of [BERT](https://gitlab.com/resistivity-net/bert) repository, but since 2026 independent.
 The code is based upon pyGIMLi (Rücker et al. 2017) and its ERT module based on Günther et al. (2006).
 Whereas the ERT module only includes only single-frequency (or chargeability) inversion, the spectral induced polarization (SIP) in the frequency domain. For time domain SIP, please use [TDIP](https://github.com/TUBAF-EM/TDIP)
 
-For details and examples, we refer to the papers of Günther & Martin (2016) describing the methodology, Martin et al. (2020) comparing with time domain, Martin et al. (2021) for application to slag heaps, and the accompagnying Zenodo data sets with codes.
-
-To use the package and keep updated, just
-
-1. `git clone` the repository and go to its location with bash, PowerShell etc.
-2. install the code editable by `pip install -e .`
-3. Update at any later time by `git pull` (no further step needed)
-
-If you use UV, the simplest way is to create a virtual environment by typing `uv run` in the project folder.
-The venv is created in the main folder and if you open the folder in VSCode it is chosen as default environment.
+For details and examples, we refer to the papers of Günther & Martin (2016) describing the methodology, Martin et al. (2020) comparing with time domain, Martin et al. (2021) for application to slag heaps, and the accompanying data sets with codes at Zenodo (e.g. [Martin2020 data](https://doi.org/10.5281/zenodo.4419735)).
 
 ## References
 
