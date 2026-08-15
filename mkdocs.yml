@@ -1,6 +1,5 @@
 site_name: FDIP
 nav:
-  - Home: index.md
   - Introduction: introduction.md
   - Installation: installation.md
   - Usage: usage.md

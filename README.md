@@ -1,4 +1,5 @@
 # FDIP
+
 Frequency-Domain Induced-Polarization data processing
 
 Formerly part of BERT repository, the theory behind the heart, spectral inversion, is described by Günther & Martin (2016).
