@@ -28,6 +28,10 @@ As a result, the instance holds an ERT data file `pro.data`and matrices of appar
 
 You can add other files by `pro.addData(filename)`
 
+If electrode positions (e.g. elevations) are not contained in the data file, they
+can be specified by `FDIP(..., electrodes=)` or set by `p2.setElectrodePositions(xh)`.
+Both triggers a numerical computation of geometric factors and recomputation of apparent resistivity.
+
 ## Preprocessing
 
 Most important preprocessing tool is `pro.filter()`.
@@ -49,48 +53,41 @@ phimin=-9e99, phimax=9e99 # min/max app. phase
 ```
 You can also mask the whole decay by `filter(..., mask=True)` in order to not to loose the apparent resistivity information.
 
+The function `.removeEpsilon()` tries to get rid of high-frequency effects by fitting a constant permittivity (imaginary part proportional to f) to the highest frequency data.
+
+### Synthetic modelling
+
 You can generate synthetic data assuming a Cole-Cole model by using
 ```python
 pro.simulate(mesh, rhovec, mvec, tauvec, cvec)
 ```
-where rhovec, mvec, tauvec, cvec are vectors pointing into the different regions of the mesh
+where `rhovec`, `mvec`, `tauvec`, `cvec` are vectors pointing into the different regions of the mesh. See notebook on synthetic modelling in example directory.
 
-`.getDataSpectrum()`
+### Visualization
 
-`.showSingleFrequencyData`
+`.showDataSpectrum()` shows the spectra for specific electrode combinations.
+`.generateSpectraPDF()` generates a multi-page PDF of frequency spectra, one for every AB combination, so that you can get an overview on the spectral behaviour.
+A single spectrum can be obtained by `.getDataSpectrum()` providing a `SIPSpectrum` instance from the `pygimli.physics.SIP` module.
 
-`.showAllFrequencyData`
 
-`.generateDataPDF()`
-
-`.showDataSpectrum()`
-
-`.generateSpectraPDF()`
-
-`.removeEpsilon()`
+All data for a specific frequency can be shown by `.showSingleFrequencyData` specifying a number (int) or a frequency (float).
+You can also show the data of all frequencies at the same time by `.showAllFrequencyData`.
+A bit more overview is obtained by putting these into a multi-page pdf using `.generateDataPDF()` and browse through the frequencies.
 
 ## Inversion
 
-`pro.singleInversion()`
+Data for a single frequency can be obtained by `pro.singleFrequencyData()`, also specifying either the number or a value. This can then be treated with the `ERTIPManager` of pyGIMLi's ERT module, completely independent of FDIP.
+However, you can also do the same with `pro.singleInversion()`.
+This triggers an `ERTIPManager`, to which you can pass all options.
 
-This triggers an `ERTIPManager()` to which you can pass all options.
+`pro.showSingleResult` shows the result of this inversion.
 
-`pro.showSingleResult` shows the result
-
-To invert all frequencies sequentially, use
-`pro.individualInversion()`
-or simultaneously, use
-`pro.simultaneousInversion()`
-which in turn calls
-`pro.simultaneousRestivityInversion()`
-and
-`pro.simultaneousPhaseInversion()`
-
-
-There is a special inversion into Debye models for every cell.
-`pro.invertDebye()`
-
+To invert all frequencies sequentially, use `pro.individualInversion()`,
+The better option is to invert them simultaneously by `pro.simultaneousInversion()`,
+which in turn calls `pro.simultaneousRestivityInversion()` and `pro.simultaneousPhaseInversion()` (the latter will be replaced by a fully complex constrained inversion).
 Class instances can be accessed by `pro.ERT`, `pro.invIP`
+
+There is also a special inversion into Debye models for every cell using `pro.invertDebye()` which treats everything in the Debye (exponential Decay) space.
 
 ## Postprocessing
 
@@ -101,20 +98,15 @@ As a result of apparent chargeability inversion, you have a matrix of resistivit
 `.fitAllRhoPhi()` fits both resistivity and phase, whereas `.fitAllPhi()` fits only phases
 
 As a result, you obtain a Cole-Cole model for every cell, whose parameter can be show with `showColeColeParameters`.
-
-`saveFigures()`
-
-`saveResults()`
-
-`loadResults()`
-
-so that you can do postprocessing independent of inversion by
+After inversion, you can save the results by `saveResults()` and load them later by `loadResults()`, so that you can do postprocessing independent of inversion by
 
 ```python
 pro = FDIP(filename)
 pro.loadResults()
 ...
 ```
+
+`saveFigures()` saves all created figures under a filename consisting of the data file and the type of the figure.
 
 ## Working in 3D
 
