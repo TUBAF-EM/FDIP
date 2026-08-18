@@ -315,12 +315,7 @@ class FDIP:
                         ii.append(ir)
                         iu.append(iru)
 
-        # create data container
         self.data = pg.DataContainerERT()
-
-        for line in self.header['Layout']:
-            self.data.createSensor(pg.Pos(line[2], 0., 0.))
-
         if electrodes is not None:
             if len(electrodes) >= self.data.sensorCount():
                 self.data.setSensorPositions(electrodes)
