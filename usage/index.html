@@ -137,6 +137,9 @@ Single-frequency modelling and inversion is completely included in pyGIMLi, so t
 <p>You can also create an empty instance and use <code>pro.load(filename)</code>.</p>
 <p>As a result, the instance holds an ERT data file <code>pro.data</code>and matrices of apparent resistivity <code>pro.RHOA</code>) and phase ( <code>pro.PHIA</code>).</p>
 <p>You can add other files by <code>pro.addData(filename)</code></p>
+<p>If electrode positions (e.g. elevations) are not contained in the data file, they
+can be specified by <code>FDIP(..., electrodes=)</code> or set by <code>p2.setElectrodePositions(xh)</code>.
+Both triggers a numerical computation of geometric factors and recomputation of apparent resistivity.</p>
 <h2 id="preprocessing">Preprocessing</h2>
 <p>Most important preprocessing tool is <code>pro.filter()</code>.
 It works either along the data sequence axis (like <code>data.remove()</code>) or along the time axis and removes complete data (including all gates) or gates (for all data).
@@ -152,45 +155,40 @@ electrode=None, ab=None, mn=None, # electrodes (combinations)
 phimin=-9e99, phimax=9e99 # min/max app. phase
 </code></pre>
 <p>You can also mask the whole decay by <code>filter(..., mask=True)</code> in order to not to loose the apparent resistivity information.</p>
+<p>The function <code>.removeEpsilon()</code> tries to get rid of high-frequency effects by fitting a constant permittivity (imaginary part proportional to f) to the highest frequency data.</p>
+<h3 id="synthetic-modelling">Synthetic modelling</h3>
 <p>You can generate synthetic data assuming a Cole-Cole model by using</p>
 <pre><code class="language-python">pro.simulate(mesh, rhovec, mvec, tauvec, cvec)
 </code></pre>
-<p>where rhovec, mvec, tauvec, cvec are vectors pointing into the different regions of the mesh</p>
-<p><code>.getDataSpectrum()</code></p>
-<p><code>.showSingleFrequencyData</code></p>
-<p><code>.showAllFrequencyData</code></p>
-<p><code>.generateDataPDF()</code></p>
-<p><code>.showDataSpectrum()</code></p>
-<p><code>.generateSpectraPDF()</code></p>
-<p><code>.removeEpsilon()</code></p>
+<p>where <code>rhovec</code>, <code>mvec</code>, <code>tauvec</code>, <code>cvec</code> are vectors pointing into the different regions of the mesh. See notebook on synthetic modelling in example directory.</p>
+<h3 id="visualization">Visualization</h3>
+<p><code>.showDataSpectrum()</code> shows the spectra for specific electrode combinations.
+<code>.generateSpectraPDF()</code> generates a multi-page PDF of frequency spectra, one for every AB combination, so that you can get an overview on the spectral behaviour.
+A single spectrum can be obtained by <code>.getDataSpectrum()</code> providing a <code>SIPSpectrum</code> instance from the <code>pygimli.physics.SIP</code> module.</p>
+<p>All data for a specific frequency can be shown by <code>.showSingleFrequencyData</code> specifying a number (int) or a frequency (float).
+You can also show the data of all frequencies at the same time by <code>.showAllFrequencyData</code>.
+A bit more overview is obtained by putting these into a multi-page pdf using <code>.generateDataPDF()</code> and browse through the frequencies.</p>
 <h2 id="inversion">Inversion</h2>
-<p><code>pro.singleInversion()</code></p>
-<p>This triggers an <code>ERTIPManager()</code> to which you can pass all options.</p>
-<p><code>pro.showSingleResult</code> shows the result</p>
-<p>To invert all frequencies sequentially, use
-<code>pro.individualInversion()</code>
-or simultaneously, use
-<code>pro.simultaneousInversion()</code>
-which in turn calls
-<code>pro.simultaneousRestivityInversion()</code>
-and
-<code>pro.simultaneousPhaseInversion()</code></p>
-<p>There is a special inversion into Debye models for every cell.
-<code>pro.invertDebye()</code></p>
-<p>Class instances can be accessed by <code>pro.ERT</code>, <code>pro.invIP</code></p>
+<p>Data for a single frequency can be obtained by <code>pro.singleFrequencyData()</code>, also specifying either the number or a value. This can then be treated with the <code>ERTIPManager</code> of pyGIMLi's ERT module, completely independent of FDIP.
+However, you can also do the same with <code>pro.singleInversion()</code>.
+This triggers an <code>ERTIPManager</code>, to which you can pass all options.</p>
+<p><code>pro.showSingleResult</code> shows the result of this inversion.</p>
+<p>To invert all frequencies sequentially, use <code>pro.individualInversion()</code>,
+The better option is to invert them simultaneously by <code>pro.simultaneousInversion()</code>,
+which in turn calls <code>pro.simultaneousRestivityInversion()</code> and <code>pro.simultaneousPhaseInversion()</code> (the latter will be replaced by a fully complex constrained inversion).
+Class instances can be accessed by <code>pro.ERT</code>, <code>pro.invIP</code></p>
+<p>There is also a special inversion into Debye models for every cell using <code>pro.invertDebye()</code> which treats everything in the Debye (exponential Decay) space.</p>
 <h2 id="postprocessing">Postprocessing</h2>
 <p>As a result of apparent chargeability inversion, you have a matrix of resistivities <code>pro.RES</code> and phases <code>pro.PHI</code> for every model cell, matching the inversion mesh <code>pro.pd</code>.</p>
 <p><code>.showModelSpectrum()</code> plots the inverted spectrum for a certain position (and <code>showModelSpectra</code> for a list of them), whereas <code>.getModelSpectrum()</code> returns a pyGIMLi SIP <code>Spectrum</code> class instance which then can be further analysed.</p>
 <p><code>.fitAllRhoPhi()</code> fits both resistivity and phase, whereas <code>.fitAllPhi()</code> fits only phases</p>
-<p>As a result, you obtain a Cole-Cole model for every cell, whose parameter can be show with <code>showColeColeParameters</code>.</p>
-<p><code>saveFigures()</code></p>
-<p><code>saveResults()</code></p>
-<p><code>loadResults()</code></p>
-<p>so that you can do postprocessing independent of inversion by</p>
+<p>As a result, you obtain a Cole-Cole model for every cell, whose parameter can be show with <code>showColeColeParameters</code>.
+After inversion, you can save the results by <code>saveResults()</code> and load them later by <code>loadResults()</code>, so that you can do postprocessing independent of inversion by</p>
 <pre><code class="language-python">pro = FDIP(filename)
 pro.loadResults()
 ...
 </code></pre>
+<p><code>saveFigures()</code> saves all created figures under a filename consisting of the data file and the type of the figure.</p>
 <h2 id="working-in-3d">Working in 3D</h2>
 <p>While visualization is designed for 2D profiles, numerical computations should work in 3D as well, provided a 3D mesh is created for the ERT manager.</p>
 <h2 id="conversion-to-td">Conversion to TD</h2>
