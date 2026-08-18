@@ -1460,10 +1460,10 @@ class FDIP:
     def saveResults(self, basename=None, dirname=None):
         """Save inversion results to .rho and .phi file plus mesh."""
         if basename is None:
-            basename = Path(self.basename)
+            basename = self.basename
 
         if dirname is not None:
-            basename = Path(dirname) / basename
+            basename = dirname + '/' + basename
 
         self.pd.save(basename+'_pd.bms')
         if hasattr(self, 'RES'):
